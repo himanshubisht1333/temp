@@ -1,0 +1,208 @@
+[Round 1]
+Q: Good morning/afternoon! Thanks for coming in today. Let's start with an easy one: could you please tell me a bit about yourself and what brought you to this point in your career?
+A: hello I am Deepak what about you
+
+[Round 2]
+Q: Thanks, Deepak. As the interviewer, I'm here to learn about your qualifications today. Could you please tell me more about your background, your career journey so far, and what specifically led you to apply for this role?
+A: basically I am from computer background and I like to meet and that's why I am here
+
+[Round 1]
+Q: Good morning/afternoon, Deepak. Thanks for joining us today. To start, could you please tell me a bit about your professional journey so far, and what specifically interests you in this role we're discussing today?
+A: hello I am Deepak
+
+[Round 2]
+Q: Thanks for introducing yourself, Deepak. To help me understand your background better, could you walk me through your career path so far? What roles have you held, and what kind of projects or responsibilities have you had?
+A: previous previously I was a self developer and made front and sites for some companies
+
+[Round 1]
+Q: Good morning/afternoon, Deepak. Thanks for joining us today. To start, could you please tell me a bit about your professional journey so far, what kind of work you've been doing, and what specifically interests you in this role we're discussing today?
+A: hello I am Deepak I am interested in front and development
+
+[Q1]
+Q: Tell me about yourself.
+A: hello I am Deepak I love to make sentence
+
+[Q2]
+Q: Tell me about yourself.
+A: I have make some website of company and also portfolios
+
+[Q1]
+Q: Tell me about yourself and what led you to pursue a career in frontend engineering.
+A: I love to make designs that's why I thought to become a friend and engineer
+
+[Q2]
+Q: Tell me about yourself and what led you to pursue a career in frontend engineering.
+A: in class 6 I love to see making drawings that's why I love to this Passion Of inten Engineering
+
+[Q3]
+Q: Tell me about yourself and what led you to pursue a career in frontend engineering.
+A: I have made a Portfolio website for a company and also a Portfolio website for my designer friend who make video edits
+
+[Q4]
+Q: Tell me about yourself and what led you to pursue a career in frontend engineering.
+A: I don't have anything for professional next mission
+
+[Q5]
+Q: Your resume mentions skills in HTML, CSS, and JavaScript. Can you tell me about a project where you heavily utilized these core frontend technologies?
+A: I have use this technology's in my portfolio website
+
+[Q6]
+Q: Your resume mentions skills in HTML, CSS, and JavaScript. Can you tell me about a project where you heavily utilized these core frontend technologies?
+A: can you please and the interview
+
+[Q1]
+Q: 
+A: yes I am Deepak Gupta and I am interested in front and Engineering because I love to make designs
+
+[Q1]
+Q: 
+A: can you and the interview
+
+[Q1]
+Q: 
+A: hello I am Deepak  I love to make products or software that's why I pursues of Engineering
+
+[Q1]
+Q: 
+A: I am currently focusing on front and development USA
+
+[Q1]
+Q: 
+A: I am focusing on DSA Database Management System software engineering and core subjects
+
+[Q1]
+Q: 
+A: I am passionate about money stack
+
+[Q1]
+Q: 
+A: can you and the interview
+
+[Q1]
+Q: 
+A: back and Engineering is like a doing mathematical questions so that's why I am interested in back and Engineering
+
+[Q1]
+Q: 
+A: please and the interview
+
+[Q1]
+Q: 
+A: hello I am Deepak I am currently pursuing BCA from gurugram University I am interested in react nxgs both because I love to make designs
+
+[Q1]
+Q: 
+A: UPA
+
+[Q1]
+Q: 
+A: and the interview
+
+[Q1]
+Q: 
+A: terminate the interview
+
+[Q1]
+Q: 
+A: can you and the interview
+
+[Q1]
+Q: 
+A: cancel the interview
+
+[Q1]
+Q: 
+A: 12345
+
+[Q1]
+Q: 
+A: hello I am Deepak currently pursuing BCA from gurugram University I am interested in front and due to because I like to make designs and some how I make some front and for a micro Enterprises and Portfolio for my friend
+
+[Q1]
+Q: 
+A: I have use this in airport polio website and also E-commerce website
+
+[Q1]
+Q: 
+A: can you move to the next round technical round
+
+[Q1]
+Q: 
+A: virtual Dom is used to manipulate the elements of HTML
+
+[Q1]
+Q: 
+A: can you and the interview
+
+[Q1]
+Q: 
+A: hello I am Deepak kindly person BCA from gurugram University I was park for content when I see the US of another products level that make me Spark in my mind
+
+[Q1]
+Q: 
+A: I can't express more can you move to next tuition
+
+[Q1]
+Q: 
+A: micro Enterprises portfolio is made for just like a catalogue page for them to demonstrate products without showing physically by showing virtually  my rule was to
+
+[Q1]
+Q: 
+A: can you and the interview
+
+[Q1]
+Q: 
+A: hello can you and the interview
+
+[Q1]
+Q: 
+A: hello I am Deepak and passing BCA from gurugram University and I am interesting Infant and development because I have to challenge face challenge so many challenges so to make a front end
+
+[Q1]
+Q: 
+A: can you complete the interview and the interview
+
+[Q1]
+Q: 
+A: hello I am Deepak currently passing BCA from gurugram University in me when I see the labels of products on the labeling earth to awesome
+
+[Q1]
+Q: 
+A: move to next question
+
+[Q1]
+Q: 
+A: HTML JavaScript as the foundation to make web pages
+
+[Q1]
+Q: 
+A: can you and the interview
+
+[Q1]
+Q: 
+A: mera naam Deepak hai
+
+[Q1]
+Q: 
+A: abhi main front banata hun aur is roll Ke Liye Main fit hun
+
+[Q1]
+Q: 
+A: Kyunki Mujhe front banana bahut pasand hai
+
+[Q1]
+Q: 
+A: hello I am Deepak currently passing BCA from gurugram University and in BCA currently studying Data Structure database management system and operating system
+
+[Q1]
+Q: 
+A: hello I am Deepak from gurugram University I am interested in software engineering because here I got too much money
+
+[Q1]
+Q: 
+A: because in engineering we have to optimise your mind and use your mind
+
+[Q1]
+Q: 
+A: mera naam Deepak hai main software engineering isliye karna chahta hun Kyunki usmein Mota Paisa Milta Hai
+

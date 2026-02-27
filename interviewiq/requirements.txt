@@ -1,0 +1,11 @@
+flask
+pdfplumber
+requests
+dotenv
+pdf2image
+cloudinary
+gradio_client
+pillow
+cors
+flask_cors
+google.generativeai

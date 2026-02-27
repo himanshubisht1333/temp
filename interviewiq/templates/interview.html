@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Voice Interview</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        h2 { color: #1a202c; margin-bottom: 6px; font-size: 1.6rem; }
+        .subtitle { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
+
+        #chat-container {
+            width: 100%;
+            max-width: 720px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Waiting banner shown until questions are uploaded via API */
+        #waiting-banner {
+            padding: 28px 24px;
+            background: #fffbeb;
+            border-bottom: 1px solid #f6e05e;
+            text-align: center;
+        }
+
+        #waiting-banner .icon { font-size: 2rem; margin-bottom: 8px; }
+
+        #waiting-banner p {
+            color: #744210;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        #waiting-banner code {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #92400e;
+        }
+
+        #poll-status {
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: #a0aec0;
+        }
+
+        #chat {
+            padding: 24px;
+            height: 440px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            display: none; /* hidden until questions loaded */
+        }
+
+        .message { display: flex; flex-direction: column; max-width: 82%; }
+        .message.ai { align-self: flex-start; }
+        .message.user { align-self: flex-end; }
+
+        .message-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .message.ai .message-label { color: #4a90d9; }
+        .message.user .message-label { color: #48bb78; }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.55;
+        }
+
+        .message.ai .bubble {
+            background: #ebf4ff;
+            color: #1a202c;
+            border-top-left-radius: 2px;
+        }
+
+        .message.user .bubble {
+            background: #c6f6d5;
+            color: #1a202c;
+            border-top-right-radius: 2px;
+        }
+
+        #status-bar {
+            padding: 14px 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f7fafc;
+        }
+
+        #status-indicator {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: #cbd5e0;
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
+
+        #status-indicator.listening { background: #48bb78; animation: pulse 1s infinite; }
+        #status-indicator.thinking  { background: #4a90d9; animation: pulse 0.6s infinite; }
+        #status-indicator.speaking  { background: #ed8936; animation: pulse 0.8s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+
+        #status-text { color: #4a5568; font-size: 0.9rem; }
+
+        #controls {
+            padding: 16px 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #start-btn { background: #4a90d9; color: white; display: none; }
+        #start-btn:hover { background: #357abd; }
+        #start-btn:disabled { background: #a0aec0; cursor: not-allowed; }
+
+        #mic-btn { background: #48bb78; color: white; display: none; }
+        #mic-btn:hover { background: #38a169; }
+        #mic-btn.active { background: #e53e3e; }
+        #mic-btn.active:hover { background: #c53030; }
+    </style>
+</head>
+<body>
+
+<h2>🎙️ AI Voice Interview</h2>
+<p class="subtitle">Powered by Gemini — adaptive, conversational, real.</p>
+
+<div id="chat-container">
+
+    <!-- Shown until questions are received via API -->
+    <div id="waiting-banner">
+        <div class="icon">⏳</div>
+        <p>
+            Waiting for questions to be uploaded via API.<br><br>
+            Call <code>POST /upload-questions</code> with your questions,<br>
+            then the interview will start automatically.
+        </p>
+        <div id="poll-status">Checking every 3 seconds…</div>
+    </div>
+
+    <div id="chat"></div>
+
+    <div id="status-bar" style="display:none">
+        <div id="status-indicator"></div>
+        <span id="status-text">Initializing…</span>
+    </div>
+
+    <div id="controls" style="display:none">
+        <button id="start-btn">▶ Start Interview</button>
+        <button id="mic-btn" onclick="toggleMic()">🎤 Speak</button>
+    </div>
+
+</div>
+
+<script>
+let recognition;
+let silenceTimer;
+let isListening = false;
+let interviewActive = false;
+let currentTranscript = "";
+let pollInterval = null;
+
+// ── Poll until questions are uploaded ────────────────────────────────────────
+async function checkQuestionsReady() {
+    try {
+        const res = await fetch("/questions-status");
+        const data = await res.json();
+        if (data.ready) {
+            clearInterval(pollInterval);
+            document.getElementById("poll-status").textContent = `✅ ${data.question_count} questions loaded! Starting interview…`;
+            setTimeout(startInterview, 1200);
+        }
+    } catch (e) {
+        // server not ready yet, keep polling
+    }
+}
+
+pollInterval = setInterval(checkQuestionsReady, 3000);
+checkQuestionsReady(); // check immediately on load too
+
+// ── Status helpers ───────────────────────────────────────────────────────────
+function setStatus(mode, text) {
+    document.getElementById("status-indicator").className = mode;
+    document.getElementById("status-text").textContent = text;
+}
+
+function addMessage(type, sender, text) {
+    const chat = document.getElementById("chat");
+    const div = document.createElement("div");
+    div.className = `message ${type}`;
+    div.innerHTML = `<div class="message-label">${sender}</div><div class="bubble">${text}</div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+// ── Speech synthesis ─────────────────────────────────────────────────────────
+function speak(text, callback) {
+    speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = 0.95;
+    setStatus("speaking", "Interviewer is speaking…");
+    utt.onend = () => {
+        setStatus("", "");
+        if (callback) callback();
+    };
+    speechSynthesis.speak(utt);
+}
+
+// ── Speech recognition ────────────────────────────────────────────────────────
+function setupRecognition() {
+    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    currentTranscript = "";
+
+    recognition.onstart = () => {
+        isListening = true;
+        setStatus("listening", "Listening… speak your answer.");
+        const btn = document.getElementById("mic-btn");
+        btn.textContent = "⏹ Done";
+        btn.classList.add("active");
+    };
+
+    recognition.onresult = (event) => {
+        clearTimeout(silenceTimer);
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                currentTranscript += event.results[i][0].transcript + " ";
+            } else {
+                interim = event.results[i][0].transcript;
+            }
+        }
+        setStatus("listening", `"${(currentTranscript + interim).trim()}"`);
+        silenceTimer = setTimeout(() => {
+            if (currentTranscript.trim()) recognition.stop();
+        }, 2500);
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        const btn = document.getElementById("mic-btn");
+        btn.textContent = "🎤 Speak";
+        btn.classList.remove("active");
+
+        const answer = currentTranscript.trim();
+        if (answer && interviewActive) {
+            sendAnswer(answer);
+        } else if (!answer) {
+            setStatus("", "Nothing detected. Press 'Speak' to try again.");
+        }
+    };
+
+    recognition.onerror = (e) => {
+        isListening = false;
+        setStatus("", `Mic error: ${e.error}. Press 'Speak' to retry.`);
+    };
+}
+
+function toggleMic() {
+    if (isListening) {
+        recognition.stop();
+    } else {
+        setupRecognition();
+        recognition.start();
+    }
+}
+
+// ── Auto-start interview once questions are confirmed ready ──────────────────
+async function startInterview() {
+    // Swap UI: hide banner, show chat
+    document.getElementById("waiting-banner").style.display = "none";
+    document.getElementById("chat").style.display = "flex";
+    document.getElementById("status-bar").style.display = "flex";
+    document.getElementById("controls").style.display = "flex";
+    document.getElementById("mic-btn").style.display = "inline-block";
+
+    setStatus("thinking", "Starting interview…");
+
+    const res = await fetch("/start", { method: "POST" });
+    const data = await res.json();
+
+    if (data.error) {
+        setStatus("", `Error: ${data.error}`);
+        return;
+    }
+
+    interviewActive = true;
+    addMessage("ai", "Interviewer", data.reply);
+    speak(data.reply, () => {
+        setupRecognition();
+        recognition.start();
+    });
+}
+
+// ── Answer flow ───────────────────────────────────────────────────────────────
+async function sendAnswer(answer) {
+    addMessage("user", "You", answer);
+    setStatus("thinking", "Gemini is thinking…");
+
+    const res = await fetch("/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answer })
+    });
+
+    const data = await res.json();
+    addMessage("ai", "Interviewer", data.reply);
+
+    if (data.completed) {
+        interviewActive = false;
+        speak(data.reply);
+        setStatus("", "Interview complete. Thank you!");
+        document.getElementById("mic-btn").style.display = "none";
+        return;
+    }
+
+    speak(data.reply, () => {
+        setupRecognition();
+        recognition.start();
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+=== ROUND 1 ===
+Tell me about yourself.
+What are your strengths?
+Why should we hire you?
+
+=== ROUND 2 ===
+What is React?
+Explain virtual DOM.
+What is REST API?
+
+=== ROUND 3 ===
+Design a scalable chat system.
+How would you optimize a slow website?
