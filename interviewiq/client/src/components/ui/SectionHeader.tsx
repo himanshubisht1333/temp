@@ -1,7 +1,7 @@
 import Tag from "./Tag";
 
 interface SectionHeaderProps {
-    tag: string;
+    tag?: string;
     title: React.ReactNode;
     subtitle?: string;
     className?: string;
@@ -22,7 +22,7 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
     return (
         <div className={`text-center mb-16 ${className}`}>
-            <Tag className="mb-4">{tag}</Tag>
+            {tag && <Tag className="mb-4">{tag}</Tag>}
             <h2 className="section-title mt-2">{title}</h2>
             {subtitle && (
                 <p className="text-white/50 mt-4 max-w-xl mx-auto text-sm leading-relaxed">

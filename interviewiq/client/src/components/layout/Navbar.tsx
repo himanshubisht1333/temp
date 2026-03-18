@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Menu, X, Zap } from "lucide-react";
+import { Brain, Menu, X } from "lucide-react";
+
+/**
+ * Modern SaaS Navbar for InterviewIQ
+ * High-end aesthetic inspired by Linear, Stripe, and Vercel.
+ */
 
 const navLinks = [
     { label: "How It Works", href: "#how-it-works" },
@@ -17,84 +22,102 @@ export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 20);
+        const onScroll = () => setScrolled(window.scrollY > 10);
         window.addEventListener("scroll", onScroll);
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-                    ? "bg-dark border-b-3 border-lime"
-                    : "bg-transparent border-b-3 border-transparent"
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-[72px] flex items-center ${scrolled
+                    ? "bg-[#0B0B0B]/80 backdrop-blur-md border-b border-white/10 shadow-lg"
+                    : "bg-transparent border-b border-transparent"
                 }`}
         >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-9 h-9 bg-lime border-3 border-dark flex items-center justify-center shadow-brutal-dark group-hover:translate-x-[2px] group-hover:translate-y-[2px] group-hover:shadow-none transition-all duration-150">
-                            <Brain className="w-5 h-5 text-dark" />
-                        </div>
-                        <span className="font-grotesk font-bold text-xl text-white">
-                            Interview<span className="text-lime">IQ</span>
-                        </span>
-                    </Link>
+            <div className="w-full max-w-[1200px] mx-auto px-6 flex items-center justify-between">
 
-                    {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center gap-8">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.label}
-                                href={link.href}
-                                className="text-sm font-grotesk font-medium text-white/70 hover:text-lime transition-colors duration-200 uppercase tracking-wide"
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
+                {/* Left: Logo */}
+                <Link href="/" className="flex items-center gap-2 group">
+                    <div className="w-8 h-8 bg-[#C6FF00] rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110 shadow-[0_0_15px_rgba(198,255,0,0.3)]">
+                        <Brain className="w-5 h-5 text-black" />
                     </div>
+                    <span className="font-inter font-bold text-xl text-white tracking-tight">
+                        Interview<span className="text-white/90 font-medium">IQ</span>
+                    </span>
+                </Link>
 
-                    {/* CTA */}
-                    <div className="hidden md:flex items-center gap-3">
-                        <Link href="/setup" className="brutal-btn-primary text-sm px-5 py-2 flex items-center gap-2">
-                            <Zap className="w-4 h-4" />
-                            Start Free
+                {/* Center: Navigation Links */}
+                <div className="hidden md:flex items-center gap-8">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.label}
+                            href={link.href}
+                            className="text-[14px] font-inter font-medium text-white/50 hover:text-white transition-all duration-200 tracking-wide relative group"
+                        >
+                            {link.label}
+                            <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-[#C6FF00] transition-all duration-200 group-hover:w-full" />
                         </Link>
-                    </div>
-
-                    {/* Mobile Menu Toggle */}
-                    <button
-                        onClick={() => setMobileOpen(!mobileOpen)}
-                        className="md:hidden text-white border-3 border-white p-2"
-                    >
-                        {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                    </button>
+                    ))}
                 </div>
+
+                {/* Right: Actions */}
+                <div className="hidden md:flex items-center gap-6">
+                
+                    <Link
+                        href="/setup"
+                        className="h-10 px-5 bg-[#C6FF00] hover:bg-[#D4FF33] text-black font-inter font-semibold text-[14px] rounded-linear flex items-center justify-center transition-all duration-200 hover:scale-[1.02] hover:-translate-y-[1px] active:scale-[0.98] shadow-[0_0_20px_rgba(198,255,0,0.2)]"
+                        style={{ borderRadius: '10px' }}
+                    >
+                        Start Free
+                    </Link>
+                </div>
+
+                {/* Mobile Menu Toggle */}
+                <button
+                    onClick={() => setMobileOpen(!mobileOpen)}
+                    className="md:hidden text-white/70 hover:text-white p-2 transition-colors"
+                >
+                    {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
             </div>
 
             {/* Mobile Menu */}
             <AnimatePresence>
                 {mobileOpen && (
                     <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden bg-dark border-b-3 border-lime"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="absolute top-[72px] left-0 right-0 bg-[#0B0B0B] border-b border-white/10 px-6 py-8 md:hidden shadow-2xl"
                     >
-                        <div className="px-4 py-4 space-y-3">
+                        <div className="flex flex-col gap-6">
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.label}
                                     href={link.href}
                                     onClick={() => setMobileOpen(false)}
-                                    className="block text-sm font-grotesk font-bold text-white uppercase tracking-wide py-2 border-b border-dark-200"
+                                    className="text-lg font-inter font-medium text-white/60 hover:text-[#C6FF00] transition-colors"
                                 >
                                     {link.label}
                                 </Link>
                             ))}
-                            <Link href="/setup" className="brutal-btn-primary w-full text-center block mt-4">
-                                Start Free
-                            </Link>
+                            <hr className="border-white/5 my-2" />
+                            <div className="flex flex-col gap-4">
+                                <Link
+                                    href="/login"
+                                    className="text-lg font-inter font-medium text-white/60"
+                                    onClick={() => setMobileOpen(false)}
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    href="/setup"
+                                    className="w-full h-12 bg-[#C6FF00] text-black font-inter font-bold rounded-xl flex items-center justify-center"
+                                    onClick={() => setMobileOpen(false)}
+                                >
+                                    Start Free
+                                </Link>
+                            </div>
                         </div>
                     </motion.div>
                 )}
