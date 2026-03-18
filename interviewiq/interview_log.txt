@@ -206,3 +206,15 @@ A: because in engineering we have to optimise your mind and use your mind
 Q: 
 A: mera naam Deepak hai main software engineering isliye karna chahta hun Kyunki usmein Mota Paisa Milta Hai
 
+[Q1]
+Q: 
+A: hello
+
+[Q1]
+Q: 
+A: colleges
+
+[Q1]
+Q: 
+A: band kar rakha hoga
+

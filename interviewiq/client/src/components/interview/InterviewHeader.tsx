@@ -1,6 +1,7 @@
 "use client";
 
-import { Brain, Clock, ChevronRight } from "lucide-react";
+import { Brain, Clock, ChevronRight, Square } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Round {
     id: string;
@@ -14,7 +15,7 @@ interface InterviewHeaderProps {
     rounds: Round[];
     role?: string;
     company?: string;
-    onEnd?: () => void; // called by END & GET FEEDBACK button
+    onEnd?: () => void; // called by END button
 }
 
 function formatTime(secs: number) {
@@ -25,39 +26,35 @@ function formatTime(secs: number) {
 
 export default function InterviewHeader({
     elapsed,
-    rounds,
+    rounds = [],
     role = "Frontend Engineer",
     company = "Google",
     onEnd,
 }: InterviewHeaderProps) {
     return (
-        <div className="bg-dark border-b-3 border-lime px-4 py-3 flex items-center justify-between">
+        <div className="bg-[#090909]/95 backdrop-blur-md border-b border-white/5 px-6 py-3 flex items-center justify-between z-50 relative">
+            
             <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-lime border-3 border-dark flex items-center justify-center">
-                    <Brain className="w-4 h-4 text-dark" />
+                <div className="w-9 h-9 bg-[#B6FF00]/10 border border-[#B6FF00]/20 rounded-xl flex items-center justify-center shadow-[0_0_10px_-2px_rgba(182,255,0,0.2)]">
+                    <Brain className="w-5 h-5 text-[#B6FF00]" />
                 </div>
                 <div>
-                    <div className="font-grotesk font-black text-white text-sm">InterviewIQ — LIVE SESSION</div>
-                    <div className="text-white/40 text-xs">{role} @ {company}</div>
+                    <div className="font-bold text-white text-sm">Interview<span className="text-[#B6FF00]">IQ</span> — LIVE</div>
+                    <div className="text-white/40 text-[11px] font-medium">{role} @ {company}</div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
-                {/* Timer */}
-                <div className="flex items-center gap-2 bg-card border-3 border-dark-300 px-3 py-1">
-                    <Clock className="w-3 h-3 text-lime" />
-                    <span className="font-grotesk font-bold text-white text-sm">{formatTime(elapsed)}</span>
-                </div>
-
-                {/* Round indicators */}
-                <div className="hidden sm:flex items-center gap-2">
+            <div className="flex items-center gap-6">
+                
+                {/* Mode Tabs (Rounds) */}
+                <div className="hidden sm:flex items-center gap-1.5 bg-[#0C0C0C] border border-white/5 p-1 rounded-xl">
                     {rounds.map(r => (
                         <div
                             key={r.id}
-                            className={`px-3 py-1 text-xs font-grotesk font-bold uppercase border-2 ${
+                            className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all cursor-default ${
                                 r.active
-                                    ? "bg-lime text-dark border-dark"
-                                    : "bg-transparent text-white/30 border-dark-300"
+                                    ? "bg-[#B6FF00] text-black shadow-[0_4px_10px_-3px_rgba(182,255,0,0.4)]"
+                                    : "bg-transparent text-white/40"
                             }`}
                         >
                             {r.label}
@@ -65,14 +62,27 @@ export default function InterviewHeader({
                     ))}
                 </div>
 
-                {/* END button — calls onEnd which triggers /evaluate then redirects */}
-                <button
+                {/* Timer container offset */}
+                <div className="flex items-center gap-2 bg-[#0C0C0C] border border-white/5 px-4 py-1.5 rounded-xl">
+                    <motion.div
+                        animate={{ opacity: [1, 0.4, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                    >
+                        <Clock className="w-3.5 h-3.5 text-[#B6FF00]" />
+                    </motion.div>
+                    <span className="font-grotesk font-black text-white text-sm tracking-widest">{formatTime(elapsed)}</span>
+                </div>
+
+                {/* End Interview triggers */}
+                <motion.button
                     onClick={onEnd}
-                    className="brutal-btn-primary text-xs px-4 py-2 flex items-center gap-1"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-xs uppercase px-4 py-2 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-[0_0_15px_-5px_rgba(239,68,68,0.3)]"
                 >
-                    End & Get Feedback
-                    <ChevronRight className="w-3 h-3" />
-                </button>
+                    <Square className="w-3.5 h-3.5 fill-current" />
+                    End
+                </motion.button>
             </div>
         </div>
     );

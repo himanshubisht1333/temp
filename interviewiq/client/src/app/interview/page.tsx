@@ -7,7 +7,7 @@ import InterviewHeader from "@/components/interview/InterviewHeader";
 import ChatMessage, { type Message } from "@/components/interview/ChatMessage";
 import TypingIndicator from "@/components/interview/TypingIndicator";
 import {
-    Mic, MicOff, Camera, CameraOff, Volume2, AlertCircle, CheckCircle2, Square, Loader2
+    Mic, MicOff, Camera, CameraOff, Volume2, AlertCircle, CheckCircle2, Square, Loader2, Brain
 } from "lucide-react";
 
 const rounds = [
@@ -339,16 +339,22 @@ export default function InterviewPage() {
     // Render
     // ─────────────────────────────────────────────────────────────────────────
     return (
-        <div className="h-screen bg-dark flex flex-col overflow-hidden">
+        <div className="h-screen bg-[#090909] text-white flex flex-col overflow-hidden relative">
+            {/* Faint Grid Background Overlay */}
+            <div className="absolute inset-0 z-0 bg-transparent" style={{
+                backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
+                backgroundSize: '40px 40px'
+            }} />
+
             <InterviewHeader elapsed={elapsed} rounds={rounds} onEnd={handleEndSession} />
 
-            <div className="flex overflow-hidden" style={{ height: "calc(100vh - 56px)" }}>
+            <div className="flex-1 flex overflow-hidden z-10 relative">
 
-                {/* ── LEFT: Chat ─────────────────────────────────────────── */}
-                <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-
-                    {/* Messages */}
-                    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 min-h-0">
+                {/* ── LEFT side: Conversational Chat Interface ─────────────────── */}
+                <div className="flex-1 flex flex-col bg-[#0C0C0C]/50 border-r border-white/5 overflow-hidden">
+                    
+                    {/* Chat Messages scroll area */}
+                    <div className="flex-1 overflow-y-auto px-8 py-8 space-y-6 min-h-0">
                         <AnimatePresence initial={false}>
                             {messages.map(msg => (
                                 <ChatMessage key={msg.id} message={msg} />
@@ -356,23 +362,31 @@ export default function InterviewPage() {
                         </AnimatePresence>
 
                         <AnimatePresence>
-                            {isAiTyping && <TypingIndicator />}
+                            {isAiTyping && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0 }}
+                                    className="flex items-center gap-2 text-white/40 text-xs font-semibold px-2 animate-pulse"
+                                >
+                                    <div className="w-4 h-4 rounded-full border border-dashed border-[#B6FF00] animate-spin" />
+                                    AI is analyzing your response...
+                                </motion.div>
+                            )}
                         </AnimatePresence>
 
-                        {/* Waiting state */}
+                        {/* Waiting state overlay */}
                         {status === "waiting" && (
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="flex flex-col items-center justify-center h-48 gap-3"
+                                className="flex flex-col items-center justify-center h-full gap-4"
                             >
-                                <motion.div
-                                    className="w-8 h-8 rounded-full border-2 border-lime border-t-transparent"
-                                    animate={{ rotate: 360 }}
-                                    transition={{ repeat: Infinity, duration: 0.9, ease: "linear" }}
-                                />
-                                <p className="text-white/40 text-sm">
-                                    Waiting for questions to be ready…
+                                <div className="w-12 h-12 rounded-full border-2 border-dashed border-[#B6FF00] flex items-center justify-center animate-spin">
+                                    <Brain className="w-6 h-6 text-[#B6FF00] animate-pulse" />
+                                </div>
+                                <p className="text-white/40 text-xs font-black uppercase tracking-widest">
+                                    Configuring setup parameters...
                                 </p>
                             </motion.div>
                         )}
@@ -382,172 +396,179 @@ export default function InterviewPage() {
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="flex items-center gap-3 bg-lime/10 border border-lime/30 text-lime px-4 py-3 rounded text-sm mx-2"
+                                className="flex items-center gap-3 bg-[#B6FF00]/10 border border-[#B6FF00]/20 text-[#B6FF00] px-4 py-3 rounded-2xl text-xs font-bold font-inter mx-auto max-w-sm"
                             >
                                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                                 Interview complete. Great job!
                             </motion.div>
                         )}
 
-                        {/* Error state */}
-                        {status === "error" && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded text-sm mx-2"
-                            >
-                                <AlertCircle className="w-4 h-4 shrink-0" />
-                                {statusText}
-                            </motion.div>
-                        )}
-
                         <div ref={bottomRef} />
                     </div>
 
-                    {/* ── Bottom bar ───────────────────────────────────── */}
-                    <div className="border-t border-dark-300 bg-dark-200 px-4 py-3 flex items-center gap-3">
-
-                        {/* Status dot */}
-                        <motion.div
-                            className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                                isListening  ? "bg-lime" :
-                                isAiTyping   ? "bg-blue-400" :
-                                evaluating   ? "bg-yellow-400" :
-                                status === "complete" ? "bg-lime" :
-                                status === "error"    ? "bg-red-400" :
-                                "bg-white/20"
-                            }`}
-                            animate={isListening || isAiTyping || evaluating ? { opacity: [1, 0.3, 1] } : {}}
-                            transition={{ repeat: Infinity, duration: 1 }}
-                        />
-
-                        {/* Status text / live transcript */}
-                        <span className="flex-1 text-sm text-white/50 truncate">
-                            {isListening && liveTranscript
-                                ? <span className="text-white/80 italic">"{liveTranscript}"</span>
-                                : statusText
-                            }
-                        </span>
-
-                        {/* Mic button — hidden when evaluating or done */}
-                        {!evaluating && !interviewDone && (
-                            <button
-                                onClick={toggleMic}
-                                disabled={status !== "active"}
-                                className={`flex items-center gap-2 px-4 py-2 border-2 font-bold text-sm uppercase transition-all ${
-                                    isListening
-                                        ? "bg-red-500 border-red-500 text-white"
-                                        : status === "active"
-                                        ? "bg-lime border-lime text-dark hover:opacity-80"
-                                        : "bg-dark-300 border-dark-300 text-white/20 cursor-not-allowed"
+                    {/* ── Bottom Response Controls ───────────────────────────── */}
+                    <div className="border-t border-white/5 bg-[#0C0C0C]/80 px-6 py-4 flex items-center justify-between gap-4 backdrop-blur-md">
+                        <div className="flex items-center gap-3">
+                            {/* Status dot tracking pulses */}
+                            <motion.div
+                                className={`w-2 h-2 rounded-full shrink-0 ${
+                                    isListening  ? "bg-[#B6FF00] shadow-[0_0_8px_#B6FF00]" :
+                                    isAiTyping   ? "bg-blue-400" :
+                                    evaluating   ? "bg-yellow-400" :
+                                    status === "complete" ? "bg-[#B6FF00]" :
+                                    "bg-white/20"
                                 }`}
-                            >
-                                {isListening
-                                    ? <><MicOff className="w-4 h-4" /> Stop</>
-                                    : <><Mic    className="w-4 h-4" /> Speak</>
-                                }
-                            </button>
-                        )}
+                                animate={isListening || isAiTyping || evaluating ? { opacity: [1, 0.4, 1] } : {}}
+                                transition={{ repeat: Infinity, duration: 1 }}
+                            />
+                            
+                            {/* Status Text / Waveform overlay when speaking */}
+                            {isListening ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="flex gap-0.5 h-3.5 items-center">
+                                        {[...Array(4)].map((_, i) => (
+                                            <motion.div
+                                                key={i}
+                                                animate={{ height: ["3px", "14px", "3px"] }}
+                                                transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15 }}
+                                                className="w-0.5 bg-[#B6FF00] rounded-full"
+                                            />
+                                        ))}
+                                    </div>
+                                    <span className="text-[#B6FF00] text-xs font-bold leading-none italic truncate max-w-[200px] md:max-w-md">
+                                        {liveTranscript ? `"${liveTranscript}"` : "Listening..."}
+                                    </span>
+                                </div>
+                            ) : (
+                                <span className="text-white/40 text-xs font-medium truncate max-w-[200px] md:max-w-md">
+                                    {statusText}
+                                </span>
+                            )}
+                        </div>
 
-                        {/* END INTERVIEW button — always visible when active */}
-                        {status === "active" && !evaluating && (
-                            <button
-                                onClick={handleEndSession}
-                                className="flex items-center gap-2 px-4 py-2 border-2 border-red-500 bg-red-500/10 text-red-400 font-bold text-sm uppercase hover:bg-red-500 hover:text-white transition-all"
-                            >
-                                <Square className="w-4 h-4 fill-current" />
-                                End Interview
-                            </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                            {/* Speak Button triggers overlays offsets cleanly */}
+                            {!evaluating && !interviewDone && (
+                                <motion.button
+                                    onClick={toggleMic}
+                                    disabled={status !== "active"}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase transition-all shadow-md ${
+                                        isListening
+                                            ? "bg-red-500 text-white shadow-[0_0_15px_-5px_rgba(239,68,68,0.4)]"
+                                            : status === "active"
+                                            ? "bg-[#B6FF00] text-black hover:scale-105 shadow-[0_4px_15px_-5px_rgba(182,255,0,0.4)]"
+                                            : "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
+                                    }`}
+                                >
+                                    {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                                    <span>{isListening ? "Stop" : "Speak"}</span>
+                                </motion.button>
+                            )}
 
-                        {/* Evaluating spinner */}
-                        {evaluating && (
-                            <div className="flex items-center gap-2 px-4 py-2 border-2 border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-sm font-bold uppercase">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Analysing…
-                            </div>
-                        )}
+                            {/* Evaluating state spinner triggers */}
+                            {evaluating && (
+                                <div className="flex items-center gap-2 px-4 py-2 bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-black uppercase rounded-xl">
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    <span>Analysing…</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* ── RIGHT: Sidebar + Camera ────────────────────────────── */}
-                <div className="w-72 border-l border-dark-300 flex flex-col bg-dark-100 overflow-hidden shrink-0">
+                {/* ── RIGHT side: AI Interviewer Panel + Camera Preview ────────── */}
+                <div className="w-80 flex flex-col bg-[#090909] overflow-hidden shrink-0 border-l border-white/5">
 
-                    {/* Camera preview */}
-                    <div className="relative bg-black border-b border-dark-300" style={{ height: "180px", flexShrink: 0 }}>
+                    {/* AI Avatar Pane */}
+                    <div className="flex-1 flex flex-col items-center justify-center p-8 border-b border-white/5 relative">
+                        {/* Glowing ring overlays triggers offsets cleanly for speak states */}
+                        <motion.div
+                            className={`w-28 h-28 rounded-full border-2 flex items-center justify-center relative ${
+                                isAiTyping ? "border-[#B6FF00]" : "border-white/10"
+                            }`}
+                            animate={isAiTyping ? { boxShadow: ["0 0 0px #B6FF00", "0 0 20px #B6FF00", "0 0 0px #B6FF00"] } : {}}
+                            transition={{ repeat: Infinity, duration: 1.5 }}
+                        >
+                            <div className={`w-22 h-22 rounded-full flex items-center justify-center bg-[#0C0C0C] ${isAiTyping ? "scale-95" : "scale-100"} transition-all duration-300`}>
+                                <Brain className={`w-10 h-10 ${isAiTyping ? "text-[#B6FF00] animate-pulse" : "text-white/20"}`} />
+                            </div>
+
+                            {/* Continuous circular rings pulsating surrounding setup */}
+                            {isAiTyping && (
+                                <motion.div 
+                                    className="absolute inset-0 rounded-full border border-[#B6FF00] opacity-50"
+                                    animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
+                                    transition={{ duration: 1, repeat: Infinity }}
+                                />
+                            )}
+                        </motion.div>
+
+                        <span className="text-white font-black text-xs mt-4 tracking-widest uppercase">AI Interviewer</span>
+                        <span className="text-white/40 text-[10px] uppercase font-bold mt-1">Status: {isAiTyping ? <span className="text-[#B6FF00] animate-pulse">Speaking...</span> : "Listening"}</span>
+                    </div>
+
+                    {/* User Camera Preview bottom node offset */}
+                    <div className="relative bg-black border-t border-white/5" style={{ height: "180px" }}>
                         <video
                             ref={videoRef}
                             autoPlay
                             muted
                             playsInline
-                            className={`w-full h-full object-cover ${isCameraOn ? "opacity-100" : "opacity-0"}`}
+                            className={`w-full h-full object-cover transition-opacity duration-300 ${isCameraOn ? "opacity-100" : "opacity-0"}`}
                         />
 
-                        {/* Placeholder when camera off */}
                         {!isCameraOn && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-dark-200">
-                                <CameraOff className="w-8 h-8 text-white/20" />
-                                <span className="text-white/30 text-xs">Camera off</span>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-[#0C0C0C]">
+                                <CameraOff className="w-6 h-6 text-white/20" />
+                                <span className="text-white/30 text-[10px] font-bold uppercase">Camera Off</span>
                             </div>
                         )}
 
-                        {/* Corner label */}
-                        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-xs text-white/70 font-mono">
-                            YOU
+                        {/* Top corner user tag labelling node */}
+                        <div className="absolute top-3 left-3 bg-[#090909]/80 backdrop-blur-md px-2 py-1 rounded-lg text-[10px] text-white/50 font-black tracking-widest border border-white/5">
+                            CANDIDATE
                         </div>
 
-                        {/* Recording dot */}
+                        {/* Top corner recording dot tracks coordinate offsets cleanly */}
                         {isCameraOn && (
                             <motion.div
-                                className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"
-                                animate={{ opacity: [1, 0.2, 1] }}
-                                transition={{ repeat: Infinity, duration: 1.5 }}
+                                className="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"
+                                animate={{ opacity: [1, 0.3, 1] }}
+                                transition={{ repeat: Infinity, duration: 1.2 }}
                             />
                         )}
 
-                        {/* Camera + Audio controls */}
-                        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
-                            <button
+                        {/* Camera absolute control triggers layout overlays seamlessly */}
+                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 px-3">
+                            <motion.button
                                 onClick={toggleCamera}
-                                className={`p-1.5 rounded-full border transition-all text-xs ${
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`p-1.5 rounded-lg border transition-all ${
                                     isCameraOn
-                                        ? "bg-dark/70 border-white/20 text-white hover:border-white/50"
-                                        : "bg-red-500/80 border-red-500 text-white"
+                                        ? "bg-black/60 border-white/10 text-white/70 hover:text-white"
+                                        : "bg-red-500 text-white border-none shadow-[0_0_10px_rgba(239,68,68,0.3)]"
                                 }`}
                                 title={isCameraOn ? "Turn off camera" : "Turn on camera"}
                             >
                                 {isCameraOn ? <Camera className="w-3.5 h-3.5" /> : <CameraOff className="w-3.5 h-3.5" />}
-                            </button>
+                            </motion.button>
 
                             <button
-                                className="p-1.5 rounded-full border bg-dark/70 border-white/20 text-white hover:border-white/50 transition-all"
-                                title="Speaker (always on)"
+                                className="p-1.5 rounded-full border bg-black/60 border-white/10 text-white/40 cursor-default"
+                                title="Speaker always on"
                             >
                                 <Volume2 className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>
 
-                    {/* AI interviewer avatar placeholder */}
-                    <div className="relative bg-gradient-to-br from-dark-300 to-dark-200 border-b border-dark-300 flex flex-col items-center justify-center py-5 gap-2">
-                        <div className="w-14 h-14 rounded-full bg-lime/10 border-2 border-lime/30 flex items-center justify-center">
-                            <span className="text-2xl">🤖</span>
-                        </div>
-                        <span className="text-white/60 text-xs font-mono">AI INTERVIEWER</span>
-                        {isAiTyping && (
-                            <motion.span
-                                className="text-lime text-xs"
-                                animate={{ opacity: [1, 0.4, 1] }}
-                                transition={{ repeat: Infinity, duration: 1 }}
-                            >
-                                speaking…
-                            </motion.span>
-                        )}
-                    </div>
-
                 </div>
 
             </div>
+
         </div>
     );
 }

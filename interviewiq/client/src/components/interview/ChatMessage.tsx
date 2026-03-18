@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Brain } from "lucide-react";
+import { Brain, User } from "lucide-react";
 
 export type MessageRole = "ai" | "user";
 
@@ -21,26 +21,30 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className={`flex ${isAi ? "justify-start" : "justify-end"}`}
+            initial={{ opacity: 0, y: 15, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className={`flex items-start gap-3 ${isAi ? "justify-start" : "justify-end flex-row-reverse"}`}
         >
-            {isAi && (
-                <div className="w-8 h-8 bg-lime border-3 border-dark flex items-center justify-center shrink-0 mr-3 mt-1">
-                    <Brain className="w-4 h-4 text-dark" />
-                </div>
-            )}
-            <div className={`max-w-[75%] ${isAi ? "items-start" : "items-end"} flex flex-col gap-1`}>
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-1 shadow-md ${
+                isAi 
+                    ? "bg-[#B6FF00]/10 border border-[#B6FF00]/20 text-[#B6FF00]" 
+                    : "bg-white/5 border border-white/10 text-white/70"
+            }`}>
+                {isAi ? <Brain className="w-4 h-4" /> : <User className="w-4 h-4" />}
+            </div>
+
+            <div className={`max-w-[70%] flex flex-col ${isAi ? "items-start" : "items-end"}`}>
                 <div
-                    className={`px-5 py-4 border-3 text-sm leading-relaxed font-inter ${isAi
-                            ? "bg-card border-lime shadow-brutal text-white"
-                            : "bg-lime border-dark shadow-brutal-dark text-dark"
-                        }`}
+                    className={`px-5 py-3.5 rounded-2xl text-[13px] leading-relaxed font-normal shadow-sm ${
+                        isAi
+                            ? "bg-[#0C0C0C]/80 border border-white/5 text-white/90 rounded-tl-none"
+                            : "bg-[#B6FF00] text-black font-semibold rounded-tr-none shadow-[0_5px_15px_-5px_rgba(182,255,0,0.3)]"
+                    }`}
                 >
                     {message.content}
                 </div>
-                <span className="text-white/30 text-[10px] px-1">{message.timestamp}</span>
+                <span className="text-white/20 text-[10px] mt-1 px-1 font-medium">{message.timestamp}</span>
             </div>
         </motion.div>
     );
