@@ -6,6 +6,7 @@ import dotenv
 import cloudinary
 import cloudinary.uploader
 from pdf2image import convert_from_bytes
+import pdfplumber
 import io
 import requests
 from gradio_client import Client, handle_file
@@ -63,6 +64,17 @@ def append_to_log(question_num, question, answer):
         log.write(f"[Q{question_num}]\n")
         log.write(f"Q: {question}\n")
         log.write(f"A: {answer}\n\n")
+
+
+def extract_pdf_text_locally(pdf_bytes: bytes) -> str:
+    """Fallback parser used when Poppler/pdf2image is unavailable."""
+    pages = []
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        for page in pdf.pages:
+            text = page.extract_text() or ""
+            if text.strip():
+                pages.append(text.strip())
+    return "\n\n".join(pages).strip()
 
 
 def call_gemini_rest(prompt):
@@ -168,23 +180,36 @@ def cv():
     if not frontend_prompt:
         return jsonify({"error": "No prompt provided"}), 400
 
+    file_bytes = file.read()
+    if not file_bytes:
+        return jsonify({"error": "Uploaded file is empty"}), 400
+
     uploaded_urls = []
+    ocr_result = ""
 
     # Step 1: Upload CV to Cloudinary
     try:
         if file.filename.lower().endswith(".pdf"):
-            images = convert_from_bytes(file.read(), dpi=300)
-            for image in images:
-                img_byte_arr = io.BytesIO()
-                image.save(img_byte_arr, format="JPEG")
-                img_byte_arr.seek(0)
-                result = cloudinary.uploader.upload(
-                    img_byte_arr, resource_type="image", folder="cv_uploads"
-                )
-                uploaded_urls.append(result["secure_url"])
+            try:
+                images = convert_from_bytes(file_bytes, dpi=300)
+                for image in images:
+                    img_byte_arr = io.BytesIO()
+                    image.save(img_byte_arr, format="JPEG")
+                    img_byte_arr.seek(0)
+                    result = cloudinary.uploader.upload(
+                        img_byte_arr, resource_type="image", folder="cv_uploads"
+                    )
+                    uploaded_urls.append(result["secure_url"])
+            except Exception as poppler_error:
+                print("pdf2image failed, using local PDF text extraction:", poppler_error)
+                ocr_result = extract_pdf_text_locally(file_bytes)
+                if not ocr_result:
+                    return jsonify({
+                        "error": "Unable to parse PDF. Install Poppler or upload a clearer PDF."
+                    }), 500
         else:
             img_byte_arr = io.BytesIO()
-            file.save(img_byte_arr)
+            img_byte_arr.write(file_bytes)
             img_byte_arr.seek(0)
             result = cloudinary.uploader.upload(
                 img_byte_arr, resource_type="image", folder="cv_uploads"
@@ -194,22 +219,23 @@ def cv():
         return jsonify({"error": f"File upload failed: {str(e)}"}), 500
 
     # Step 2: OCR the CV via Gradio
-    try:
-        ocr_result = gradio_client.predict(
-            message={
-                "text": """
-                You are an expert resume parser. Do not include any explanations, Markdown formatting,
-                backticks or /n /u for new line and underline. Return the raw text only in clean and
-                organised way. Extract: Name, career objective, skills, experience, education,
-                certifications, projects, achievements, and any other information.
-                """,
-                "files": [handle_file(uploaded_urls[0])],
-            },
-            api_name="/chat",
-        )
-        print("OCR result:", ocr_result)
-    except Exception as e:
-        return jsonify({"error": f"OCR failed: {str(e)}"}), 500
+    if not ocr_result:
+        try:
+            ocr_result = gradio_client.predict(
+                message={
+                    "text": """
+                    You are an expert resume parser. Do not include any explanations, Markdown formatting,
+                    backticks or /n /u for new line and underline. Return the raw text only in clean and
+                    organised way. Extract: Name, career objective, skills, experience, education,
+                    certifications, projects, achievements, and any other information.
+                    """,
+                    "files": [handle_file(uploaded_urls[0])],
+                },
+                api_name="/chat",
+            )
+            print("OCR result:", ocr_result)
+        except Exception as e:
+            return jsonify({"error": f"OCR failed: {str(e)}"}), 500
 
     # Step 3: Generate interview questions via Gemini REST
     try:
